@@ -9,6 +9,7 @@ import {
   Resolver,
 } from 'type-graphql';
 import argon2 from 'argon2';
+import { EntityManager } from '@mikro-orm/postgresql';
 
 import { MyContext } from '../types';
 import { User } from '../entities/User';
@@ -74,16 +75,24 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(options.password);
-    const user = em.create(User, {
-      userName: options.userName,
-      password: hashedPassword,
-    });
+    let user;
 
     try {
-      await em.persistAndFlush(user);
-    } catch (e) {
-      console.log('REGISTER FAIL: ', e.message);
-      if (e.code === '23505') {
+      const result = await (em as EntityManager)
+        .createQueryBuilder(User)
+        .getKnexQuery()
+        .insert({
+          user_name: options.userName,
+          password: hashedPassword,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        .returning('*');
+
+      user = result[0];
+    } catch (err) {
+      console.log('REGISTER FAIL: ', err);
+      if (err.code === '23505') {
         return {
           errors: [
             {
@@ -97,8 +106,16 @@ export class UserResolver {
 
     req.session!.userId = user.id;
 
+    console.log(user);
+
     return {
-      user,
+      user: {
+        id: user.id,
+        userName: user.user_name,
+        password: user.password,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at,
+      },
     };
   }
 
