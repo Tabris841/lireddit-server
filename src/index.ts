@@ -7,6 +7,7 @@ import session from 'express-session';
 import connectRedis from 'connect-redis';
 import cors from 'cors';
 import { createConnection } from 'typeorm';
+import { join } from 'path';
 
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
@@ -24,8 +25,13 @@ const main = async () => {
     password: 'postgres',
     logging: true,
     synchronize: true,
+    migrations: [join(__dirname, './migrations/*')],
     entities: [Post, User],
   });
+  await conn.runMigrations();
+
+  // await Post.delete({});
+  // await User.delete({});
 
   const app = express();
   const RedisStore = connectRedis(session);
