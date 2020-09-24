@@ -16,6 +16,7 @@ import { __prod__, COOKIE_NAME } from './constants';
 import { MyContext } from './types';
 import { User } from './entities/User';
 import { Post } from './entities/Post';
+import { Updoot } from './entities/Updoot';
 
 const main = async () => {
   const conn = await createConnection({
@@ -26,7 +27,7 @@ const main = async () => {
     logging: true,
     synchronize: true,
     migrations: [join(__dirname, './migrations/*')],
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
   });
   await conn.runMigrations();
 
