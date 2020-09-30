@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import {
   BaseEntity,
   Column,
@@ -15,7 +15,7 @@ import { Updoot } from './Updoot';
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
-  @Field(() => ID)
+  @Field()
   @PrimaryGeneratedColumn()
   id!: number;
 
